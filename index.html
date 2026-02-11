@@ -127,7 +127,7 @@
           <form id="rental-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div><label class="block text-sm text-gray-400 mb-2">เลือกไอดี</label>
               <select id="rental-account"
-                class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#76b900]">
+                class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-gray-400 focus:outline-none focus:border-[#76b900]">
                 <option value="">-- เลือกไอดี --</option>
               </select>
             </div>
@@ -135,10 +135,10 @@
               <input type="text" id="customer-name" placeholder="ชื่อลูกค้า"
                 class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#76b900]">
             </div>
-            <div><label class="block text-sm text-gray-400 mb-2">จำนวนชั่วโมง</label>
+            <!-- <div><label class="block text-sm text-gray-400 mb-2">จำนวนชั่วโมง</label>
               <input type="number" id="hours-rented" placeholder="ชั่วโมง" min="1"
                 class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#76b900]">
-            </div>
+            </div> -->
             <div><label class="block text-sm text-gray-400 mb-2">ราคา (฿)</label>
               <input type="number" id="rental-price" placeholder="ราคา" min="0"
                 class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#76b900]">
@@ -151,9 +151,11 @@
               <input type="datetime-local" id="end-date"
                 class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#76b900]">
             </div>
-            <div class="md:col-span-3"><button type="submit"
+            <div class="md:col-span-3">
+              <button type="submit"
                 class="w-full py-3 rounded-xl bg-gradient-to-r from-[#76b900] to-[#5a8f00] text-black font-semibold hover:opacity-90 transition-all">
-                เพิ่มรายการ </button></div>
+                เพิ่มรายการ </button>
+              </div>
           </form>
         </div>
 
@@ -188,8 +190,12 @@
           <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><span class="text-[#0095ff]">🎮</span>
             เพิ่มไอดี</h3>
           <form id="account-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div><label class="block text-sm text-gray-400 mb-2">ชื่อไอดี</label>
-              <input type="text" id="account-name" placeholder="เช่น GFN-001"
+            <div><label class="block text-sm text-gray-400 mb-2">Gmail</label>
+              <input type="text" id="account-name" placeholder="เช่น xxx@gmail.com"
+                class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#0095ff]">
+            </div>
+            <div><label class="block text-sm text-gray-400 mb-2">รหัสผ่าน</label>
+              <input type="text" id="account-password" placeholder="รหัสผ่าน"
                 class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#0095ff]">
             </div>
             <div><label class="block text-sm text-gray-400 mb-2">ชั่วโมงทั้งหมด</label>
@@ -380,7 +386,7 @@
                 <span class="text-[#76b900] text-xs font-bold">${acc?.account_name || 'N/A'}</span>
                 <span class="text-gray-300 text-xs">${r.customer_name}</span>
               </div>
-              <div class="text-sm text-gray-400">${r.hours_rented} ชม. | ฿${r.price} | ${new Date(r.rental_date).toLocaleString('th-TH')}</div>
+              <div class="text-sm text-gray-400">${r.hours_rented} ชม. | ฿${r.price} | ${new Date(r.rental_date).toLocaleString('th-TH')} - ${new Date(r.end_date).toLocaleString('th-TH')} </div>
             </div>
             <button onclick='showDeleteModal(${JSON.stringify(r)})' class="text-red-400">🗑️</button>
           </div>
@@ -396,6 +402,7 @@
           <div class="card-glass p-4 rounded-xl border ${a.remaining_hours <= 0 ? 'border-red-500/50' : 'border-white/10'}">
             <div class="flex justify-between mb-2">
               <span class="font-bold">${a.account_name}</span>
+                  <span class="font-bold">${a.account_password}</span>
               <button onclick='showDeleteModal(${JSON.stringify(a)})' class="text-red-400">🗑️</button>
             </div>
             <div class="text-xs text-gray-400 mb-1">เหลือ ${a.remaining_hours}/${a.total_hours} ชม.</div>
@@ -424,18 +431,18 @@
     document.getElementById('rental-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const accId = document.getElementById('rental-account').value;
-      const hours = parseInt(document.getElementById('hours-rented').value);
+      // const hours = parseInt(document.getElementById('hours-rented').value);
       const acc = allData.find(a => a.__backendId === accId);
 
-      if (!accId || !hours || isNaN(hours)) return showToast("กรอกข้อมูลให้ครบ", "error");
-      if (acc.remaining_hours < hours) return showToast("ชั่วโมงไม่พอ", "error");
+      if (!accId) return showToast("กรอกข้อมูลให้ครบ", "error");
+      // if (acc.remaining_hours < hours) return showToast("ชั่วโมงไม่พอ", "error");
 
       showLoading();
       const payload = {
         type: 'rental',
         account_id: accId,
         customer_name: document.getElementById('customer-name').value,
-        hours_rented: hours,
+        hours_rented: 0,
         price: parseInt(document.getElementById('rental-price').value) || 0,
         rental_date: document.getElementById('rental-date').value,
         end_date: document.getElementById('end-date').value
@@ -443,9 +450,12 @@
 
       const res = await window.dataSdk.create(payload);
       if (res.isOk) {
-        await window.dataSdk.update({ ...acc, remaining_hours: acc.remaining_hours - hours });
+        await window.dataSdk.update({ ...acc, remaining_hours: acc.remaining_hours - 0 });
         e.target.reset();
         showToast("เพิ่มสำเร็จ");
+      }else {
+        showToast("เกิดข้อผิดพลาด", "error");
+              hideLoading();
       }
       hideLoading();
     });
@@ -453,6 +463,7 @@
     document.getElementById('account-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('account-name').value;
+           const password = document.getElementById('account-password').value;
       const hours = parseInt(document.getElementById('total-hours-input').value);
       if (!name || !hours) return;
 
@@ -460,6 +471,7 @@
       await window.dataSdk.create({
         type: 'account',
         account_name: name,
+        account_password: password,
         total_hours: hours,
         remaining_hours: hours
       });
