@@ -1,675 +1,168 @@
 <!doctype html>
 <html lang="th" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GeForce Now Rental Manager</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- SDK -->
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    body {
-      box-sizing: border-box;
-    }
-    * {
-      font-family: 'Kanit', sans-serif;
-    }
+    * { font-family: 'Kanit', sans-serif; }
     .gradient-bg {
-      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+      background: linear-gradient(135deg,#0f0f0f,#1a1a2e,#16213e);
     }
     .card-glass {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,.05);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,.1);
     }
-    .glow-green {
-      box-shadow: 0 0 20px rgba(118, 185, 0, 0.3);
-    }
-    .glow-blue {
-      box-shadow: 0 0 20px rgba(0, 149, 255, 0.3);
-    }
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 20px rgba(118, 185, 0, 0.3); }
-      50% { box-shadow: 0 0 30px rgba(118, 185, 0, 0.5); }
-    }
-    .animate-glow {
-      animation: pulse-glow 2s ease-in-out infinite;
-    }
-    .scrollbar-thin::-webkit-scrollbar {
-      width: 6px;
-    }
-    .scrollbar-thin::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-    }
+    .scrollbar-thin::-webkit-scrollbar { width:6px }
     .scrollbar-thin::-webkit-scrollbar-thumb {
-      background: rgba(118, 185, 0, 0.5);
-      border-radius: 3px;
+      background: rgba(118,185,0,.5); border-radius:3px
     }
   </style>
-  <style>@view-transition { navigation: auto; }</style>
- </head>
- <body class="h-full gradient-bg text-white">
-  <div id="app" class="h-full overflow-auto scrollbar-thin"><!-- Header -->
-   <header class="sticky top-0 z-50 bg-black/50 backdrop-blur-lg border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-       <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#76b900] to-[#5a8f00] flex items-center justify-center glow-green">
-        <svg class="w-6 h-6" viewbox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-        </svg>
-       </div>
-       <div>
-        <h1 id="app-title" class="text-xl font-bold text-[#76b900]">GeForce Now Rental</h1>
-        <p class="text-xs text-gray-400">ระบบจัดการปล่อยเช่า</p>
-       </div>
-      </div>
-      <div class="flex items-center gap-2"><span class="text-xs text-gray-400" id="current-date"></span>
-      </div>
-     </div>
-    </div>
-   </header><!-- Navigation Tabs -->
-   <nav class="max-w-7xl mx-auto px-4 py-4">
-    <div class="flex gap-2"><button onclick="switchTab('income')" id="tab-income" class="tab-btn px-6 py-3 rounded-xl font-medium transition-all bg-[#76b900] text-black"> 💰 รายรับ </button> <button onclick="switchTab('accounts')" id="tab-accounts" class="tab-btn px-6 py-3 rounded-xl font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20"> 🎮 จัดการไอดี </button>
-    </div>
-   </nav><!-- Main Content -->
-   <main class="max-w-7xl mx-auto px-4 pb-8"><!-- Income Tab -->
-    <div id="income-tab" class="space-y-6"><!-- Stats Cards -->
-     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="card-glass rounded-2xl p-4 glow-green">
-       <div class="text-gray-400 text-sm mb-1">
-        รายรับทั้งหมด
-       </div>
-       <div class="text-2xl font-bold text-[#76b900]" id="total-income">
-        ฿0
-       </div>
-      </div>
-      <div class="card-glass rounded-2xl p-4">
-       <div class="text-gray-400 text-sm mb-1">
-        ชั่วโมงที่เช่า
-       </div>
-       <div class="text-2xl font-bold text-white" id="total-hours">
-        0 ชม.
-       </div>
-      </div>
-      <div class="card-glass rounded-2xl p-4">
-       <div class="text-gray-400 text-sm mb-1">
-        จำนวนรายการ
-       </div>
-       <div class="text-2xl font-bold text-white" id="total-rentals">
-        0
-       </div>
-      </div>
-      <div class="card-glass rounded-2xl p-4">
-       <div class="text-gray-400 text-sm mb-1">
-        ไอดีที่ใช้งาน
-       </div>
-       <div class="text-2xl font-bold text-[#0095ff]" id="active-accounts">
-        0
-       </div>
-      </div>
-     </div><!-- Add Rental Form -->
-     <div class="card-glass rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><span class="text-[#76b900]">➕</span> เพิ่มรายการเช่า</h3>
-      <form id="rental-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-       <div><label class="block text-sm text-gray-400 mb-2">เลือกไอดี</label> <select id="rental-account" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#76b900]"> <option value="">-- เลือกไอดี --</option> </select>
-       </div>
-       <div><label class="block text-sm text-gray-400 mb-2">ชื่อลูกค้า</label> <input type="text" id="customer-name" placeholder="ชื่อลูกค้า" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#76b900]">
-       </div>
-       <div><label class="block text-sm text-gray-400 mb-2">จำนวนชั่วโมง</label> <input type="number" id="hours-rented" placeholder="ชั่วโมง" min="1" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#76b900]">
-       </div>
-       <div><label class="block text-sm text-gray-400 mb-2">ราคา (<span id="currency-display">฿</span>)</label> <input type="number" id="rental-price" placeholder="ราคา" min="0" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#76b900]">
-       </div>
-       <div><label class="block text-sm text-gray-400 mb-2">วันที่เช่า</label> <input type="datetime-local" id="rental-date" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#76b900]">
-       </div>
-       <div><label class="block text-sm text-gray-400 mb-2">เช่าถึงวันที่</label> <input type="datetime-local" id="end-date" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#76b900]">
-       </div>
-       <div class="md:col-span-3"><button type="submit" id="add-rental-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#76b900] to-[#5a8f00] text-black font-semibold hover:opacity-90 transition-all"> เพิ่มรายการ </button>
-       </div>
-      </form>
-     </div><!-- Rental History -->
-     <div class="card-glass rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><span class="text-[#76b900]">📋</span> ประวัติการเช่า</h3>
-      <div id="rental-list" class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
-       <div class="text-center text-gray-500 py-8">
-        <div class="text-4xl mb-2">
-         📭
-        </div>
-        <p>ยังไม่มีรายการเช่า</p>
-       </div>
-      </div>
-     </div>
-    </div><!-- Accounts Tab -->
-    <div id="accounts-tab" class="space-y-6 hidden"><!-- Account Stats -->
-     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <div class="card-glass rounded-2xl p-4 glow-blue">
-       <div class="text-gray-400 text-sm mb-1">
-        จำนวนไอดีทั้งหมด
-       </div>
-       <div class="text-2xl font-bold text-[#0095ff]" id="total-accounts">
-        0
-       </div>
-      </div>
-      <div class="card-glass rounded-2xl p-4">
-       <div class="text-gray-400 text-sm mb-1">
-        ชั่วโมงคงเหลือรวม
-       </div>
-       <div class="text-2xl font-bold text-white" id="remaining-hours">
-        0 ชม.
-       </div>
-      </div>
-      <div class="card-glass rounded-2xl p-4">
-       <div class="text-gray-400 text-sm mb-1">
-        ไอดีที่หมดเวลา
-       </div>
-       <div class="text-2xl font-bold text-red-400" id="expired-accounts">
-        0
-       </div>
-      </div>
-     </div><!-- Add Account Form -->
-     <div class="card-glass rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><span class="text-[#0095ff]">🎮</span> เพิ่มไอดี</h3>
-      <form id="account-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-       <div><label class="block text-sm text-gray-400 mb-2">ชื่อไอดี</label> <input type="text" id="account-name" placeholder="เช่น GFN-001" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#0095ff]">
-       </div>
-       <div><label class="block text-sm text-gray-400 mb-2">ชั่วโมงทั้งหมด</label> <input type="number" id="total-hours-input" placeholder="ชั่วโมง" min="1" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#0095ff]">
-       </div>
-       <div class="flex items-end"><button type="submit" id="add-account-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#0095ff] to-[#0077cc] text-white font-semibold hover:opacity-90 transition-all"> เพิ่มไอดี </button>
-       </div>
-      </form>
-     </div><!-- Account List -->
-     <div class="card-glass rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><span class="text-[#0095ff]">📁</span> รายการไอดี</h3>
-      <div id="account-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <div class="text-center text-gray-500 py-8 col-span-2">
-        <div class="text-4xl mb-2">
-         🎮
-        </div>
-        <p>ยังไม่มีไอดี กรุณาเพิ่มไอดี</p>
-       </div>
-      </div>
-     </div>
-    </div><!-- Data Limit Warning -->
-    <div id="limit-warning" class="hidden fixed bottom-4 right-4 bg-red-500/90 text-white px-6 py-3 rounded-xl shadow-lg">
-     ⚠️ ถึงจำนวนรายการสูงสุดแล้ว (999)
-    </div><!-- Loading Overlay -->
-    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-     <div class="bg-white/10 rounded-2xl p-6 flex items-center gap-3">
-      <div class="w-6 h-6 border-2 border-[#76b900] border-t-transparent rounded-full animate-spin"></div><span>กำลังดำเนินการ...</span>
-     </div>
-    </div><!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-     <div class="card-glass rounded-2xl p-6 max-w-sm mx-4">
-      <h3 class="text-lg font-semibold mb-4">ยืนยันการลบ</h3>
-      <p class="text-gray-400 mb-6">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
-      <div class="flex gap-3"><button onclick="closeDeleteModal()" class="flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all">ยกเลิก</button> <button id="confirm-delete-btn" class="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-600 transition-all">ลบ</button>
-      </div>
-     </div>
-    </div>
-   </main>
+</head>
+
+<body class="h-full gradient-bg text-white">
+<div id="app" class="h-full overflow-auto scrollbar-thin">
+
+<!-- ================= HEADER ================= -->
+<header class="sticky top-0 z-50 bg-black/50 backdrop-blur border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <h1 id="app-title" class="text-xl font-bold text-[#76b900]">
+      GeForce Now Rental
+    </h1>
+    <span id="current-date" class="text-xs text-gray-400"></span>
   </div>
-  <script>
-    // Default config
-    const defaultConfig = {
-      app_title: 'GeForce Now Rental',
-      currency_symbol: '฿',
-      background_color: '#0f0f0f',
-      primary_color: '#76b900',
-      secondary_color: '#0095ff',
-      text_color: '#ffffff',
-      surface_color: '#1a1a2e'
-    };
+</header>
 
-    let config = { ...defaultConfig };
-    let allData = [];
-    let currentRecordCount = 0;
-    let pendingDeleteRecord = null;
+<!-- ================= TABS ================= -->
+<nav class="max-w-7xl mx-auto px-4 py-4 flex gap-2">
+  <button id="tab-income" onclick="switchTab('income')" class="tab-btn px-5 py-2 rounded-xl bg-[#76b900] text-black">
+    💰 รายรับ
+  </button>
+  <button id="tab-accounts" onclick="switchTab('accounts')" class="tab-btn px-5 py-2 rounded-xl bg-white/10 text-gray-300">
+    🎮 จัดการไอดี
+  </button>
+</nav>
 
-    // Initialize current date
-    document.getElementById('current-date').textContent = new Date().toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+<main class="max-w-7xl mx-auto px-4 pb-10">
 
-    // Set default dates
-    const now = new Date();
-    document.getElementById('rental-date').value = now.toISOString().slice(0, 16);
-    const endDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    document.getElementById('end-date').value = endDate.toISOString().slice(0, 16);
+<!-- ================= INCOME TAB ================= -->
+<section id="income-tab" class="space-y-6">
 
-    // Tab switching
-    function switchTab(tab) {
-      document.getElementById('income-tab').classList.toggle('hidden', tab !== 'income');
-      document.getElementById('accounts-tab').classList.toggle('hidden', tab !== 'accounts');
-      
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-[#76b900]', 'text-black');
-        btn.classList.add('bg-white/10', 'text-gray-300');
-      });
-      
-      const activeBtn = document.getElementById(`tab-${tab}`);
-      activeBtn.classList.remove('bg-white/10', 'text-gray-300');
-      activeBtn.classList.add('bg-[#76b900]', 'text-black');
-    }
+<!-- Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400 text-sm">รายรับทั้งหมด</div>
+    <div id="total-income" class="text-2xl font-bold text-[#76b900]">฿0</div>
+  </div>
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400 text-sm">ชั่วโมงที่เช่า</div>
+    <div id="total-hours" class="text-2xl font-bold">0 ชม.</div>
+  </div>
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400 text-sm">จำนวนรายการ</div>
+    <div id="total-rentals" class="text-2xl font-bold">0</div>
+  </div>
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400 text-sm">ไอดีที่ใช้งาน</div>
+    <div id="active-accounts" class="text-2xl font-bold text-sky-400">0</div>
+  </div>
+</div>
 
-    // Show/hide loading
-    function showLoading() {
-      document.getElementById('loading-overlay').classList.remove('hidden');
-    }
+<!-- Add Rental -->
+<div class="card-glass p-6 rounded-xl">
+<h3 class="font-semibold mb-4">➕ เพิ่มรายการเช่า</h3>
+<form id="rental-form" class="grid md:grid-cols-3 gap-4">
+  <select id="rental-account" class="input"> <option value="">-- เลือกไอดี --</option></select>
+  <input id="customer-name" placeholder="ชื่อลูกค้า" class="input">
+  <input id="hours-rented" type="number" placeholder="ชั่วโมง" class="input">
+  <input id="rental-price" type="number" placeholder="ราคา" class="input">
+  <input id="rental-date" type="datetime-local" class="input">
+  <input id="end-date" type="datetime-local" class="input">
+  <button class="md:col-span-3 bg-[#76b900] text-black py-2 rounded-xl font-semibold">
+    เพิ่มรายการ
+  </button>
+</form>
+</div>
 
-    function hideLoading() {
-      document.getElementById('loading-overlay').classList.add('hidden');
-    }
+<!-- History -->
+<div class="card-glass p-6 rounded-xl">
+<h3 class="font-semibold mb-4">📋 ประวัติการเช่า</h3>
+<div id="rental-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
+</div>
 
-    // Delete modal functions
-    function showDeleteModal(record) {
-      pendingDeleteRecord = record;
-      document.getElementById('delete-modal').classList.remove('hidden');
-    }
+</section>
 
-    function closeDeleteModal() {
-      pendingDeleteRecord = null;
-      document.getElementById('delete-modal').classList.add('hidden');
-    }
+<!-- ================= ACCOUNT TAB ================= -->
+<section id="accounts-tab" class="hidden space-y-6">
 
-    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-      if (pendingDeleteRecord) {
-        showLoading();
-        const result = await window.dataSdk.delete(pendingDeleteRecord);
-        hideLoading();
-        if (!result.isOk) {
-          showToast('เกิดข้อผิดพลาดในการลบ', 'error');
-        }
-        closeDeleteModal();
-      }
-    });
+<div class="grid md:grid-cols-3 gap-4">
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400">ไอดีทั้งหมด</div>
+    <div id="total-accounts" class="text-2xl font-bold text-sky-400">0</div>
+  </div>
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400">ชั่วโมงคงเหลือ</div>
+    <div id="remaining-hours" class="text-2xl font-bold">0 ชม.</div>
+  </div>
+  <div class="card-glass p-4 rounded-xl">
+    <div class="text-gray-400">ไอดีหมดเวลา</div>
+    <div id="expired-accounts" class="text-2xl font-bold text-red-400">0</div>
+  </div>
+</div>
 
-    // Toast notification
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg z-50 transition-all ${
-        type === 'error' ? 'bg-red-500' : 'bg-[#76b900]'
-      } text-white`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
+<div class="card-glass p-6 rounded-xl">
+<h3 class="font-semibold mb-4">🎮 เพิ่มไอดี</h3>
+<form id="account-form" class="grid md:grid-cols-3 gap-4">
+  <input id="account-name" placeholder="GFN-001" class="input">
+  <input id="total-hours-input" type="number" placeholder="ชั่วโมง" class="input">
+  <button class="bg-sky-500 py-2 rounded-xl">เพิ่มไอดี</button>
+</form>
+</div>
 
-    // Data handler
-    const dataHandler = {
-      onDataChanged(data) {
-        allData = data;
-        currentRecordCount = data.length;
-        
-        // Check limit
-        if (currentRecordCount >= 999) {
-          document.getElementById('limit-warning').classList.remove('hidden');
-        } else {
-          document.getElementById('limit-warning').classList.add('hidden');
-        }
+<div class="card-glass p-6 rounded-xl">
+<h3 class="font-semibold mb-4">📁 รายการไอดี</h3>
+<div id="account-list" class="grid md:grid-cols-2 gap-4"></div>
+</div>
 
-        const rentals = data.filter(d => d.type === 'rental');
-        const accounts = data.filter(d => d.type === 'account');
+</section>
 
-        // Update stats
-        const totalIncome = rentals.reduce((sum, r) => sum + (r.price || 0), 0);
-        const totalHours = rentals.reduce((sum, r) => sum + (r.hours_rented || 0), 0);
-        const remainingHours = accounts.reduce((sum, a) => sum + (a.remaining_hours || 0), 0);
-        const expiredAccounts = accounts.filter(a => (a.remaining_hours || 0) <= 0).length;
+</main>
+</div>
 
-        document.getElementById('total-income').textContent = `${config.currency_symbol}${totalIncome.toLocaleString()}`;
-        document.getElementById('total-hours').textContent = `${totalHours} ชม.`;
-        document.getElementById('total-rentals').textContent = rentals.length;
-        document.getElementById('active-accounts').textContent = accounts.filter(a => (a.remaining_hours || 0) > 0).length;
-        document.getElementById('total-accounts').textContent = accounts.length;
-        document.getElementById('remaining-hours').textContent = `${remainingHours} ชม.`;
-        document.getElementById('expired-accounts').textContent = expiredAccounts;
+<script>
+/* ========= UTIL ========= */
+document.querySelectorAll('.input').forEach(i=>{
+  i.className += " w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20"
+})
 
-        // Update account dropdown
-        const accountSelect = document.getElementById('rental-account');
-        const currentValue = accountSelect.value;
-        accountSelect.innerHTML = '<option value="">-- เลือกไอดี --</option>';
-        accounts.forEach(acc => {
-          const option = document.createElement('option');
-          option.value = acc.__backendId;
-          option.textContent = `${acc.account_name} (เหลือ ${acc.remaining_hours} ชม.)`;
-          if (acc.remaining_hours <= 0) {
-            option.disabled = true;
-            option.textContent += ' - หมดเวลา';
-          }
-          accountSelect.appendChild(option);
-        });
-        accountSelect.value = currentValue;
+document.getElementById('current-date').textContent =
+  new Date().toLocaleDateString('th-TH',{dateStyle:'long'})
 
-        // Render rental list
-        renderRentalList(rentals, accounts);
+function switchTab(t){
+  income-tab.classList.toggle('hidden',t!=='income')
+  accounts-tab.classList.toggle('hidden',t!=='accounts')
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.replace('bg-[#76b900]','bg-white/10')
+    b.classList.replace('text-black','text-gray-300')
+  })
+  document.getElementById('tab-'+t).classList.replace('bg-white/10','bg-[#76b900]')
+}
 
-        // Render account list
-        renderAccountList(accounts);
-      }
-    };
+/* ========= DATA ========= */
+let allData=[]
+</script>
 
-    function renderRentalList(rentals, accounts) {
-      const container = document.getElementById('rental-list');
-      
-      if (rentals.length === 0) {
-        container.innerHTML = `
-          <div class="text-center text-gray-500 py-8">
-            <div class="text-4xl mb-2">📭</div>
-            <p>ยังไม่มีรายการเช่า</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Sort by date descending
-      const sortedRentals = [...rentals].sort((a, b) => 
-        new Date(b.rental_date) - new Date(a.rental_date)
-      );
-
-      container.innerHTML = sortedRentals.map(rental => {
-        const account = accounts.find(a => a.__backendId === rental.account_id);
-        const rentalDate = new Date(rental.rental_date);
-        const endDate = new Date(rental.end_date);
-        
-        return `
-          <div class="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-[#76b900]/50 transition-all">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="px-2 py-1 rounded-lg bg-[#76b900]/20 text-[#76b900] text-xs font-medium">
-                    ${account ? account.account_name : 'ไม่ทราบไอดี'}
-                  </span>
-                  <span class="text-gray-400 text-xs">${rental.customer_name || 'ไม่ระบุชื่อ'}</span>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                  <div>
-                    <span class="text-gray-500">ชั่วโมง:</span>
-                    <span class="text-white ml-1">${rental.hours_rented} ชม.</span>
-                  </div>
-                  <div>
-                    <span class="text-gray-500">ราคา:</span>
-                    <span class="text-[#76b900] ml-1 font-semibold">${config.currency_symbol}${rental.price}</span>
-                  </div>
-                  <div>
-                    <span class="text-gray-500">วันที่เช่า:</span>
-                    <span class="text-white ml-1">${rentalDate.toLocaleDateString('th-TH')} ${rentalDate.toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'})}</span>
-                  </div>
-                  <div>
-                    <span class="text-gray-500">ถึง:</span>
-                    <span class="text-white ml-1">${endDate.toLocaleDateString('th-TH')} ${endDate.toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'})}</span>
-                  </div>
-                </div>
-              </div>
-              <button onclick='deleteRental(${JSON.stringify(rental).replace(/'/g, "\\'")})' class="p-2 text-red-400 hover:bg-red-400/20 rounded-lg transition-all">
-                🗑️
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderAccountList(accounts) {
-      const container = document.getElementById('account-list');
-      
-      if (accounts.length === 0) {
-        container.innerHTML = `
-          <div class="text-center text-gray-500 py-8 col-span-2">
-            <div class="text-4xl mb-2">🎮</div>
-            <p>ยังไม่มีไอดี กรุณาเพิ่มไอดี</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = accounts.map(account => {
-        const percentage = account.total_hours > 0 
-          ? Math.round((account.remaining_hours / account.total_hours) * 100) 
-          : 0;
-        const isLow = percentage <= 20;
-        const isExpired = account.remaining_hours <= 0;
-
-        return `
-          <div class="bg-white/5 rounded-xl p-4 border ${isExpired ? 'border-red-500/50' : 'border-white/10'} hover:border-[#0095ff]/50 transition-all">
-            <div class="flex items-start justify-between mb-3">
-              <div>
-                <h4 class="font-semibold text-lg">${account.account_name}</h4>
-                <span class="text-xs ${isExpired ? 'text-red-400' : isLow ? 'text-yellow-400' : 'text-gray-400'}">
-                  ${isExpired ? '❌ หมดเวลา' : isLow ? '⚠️ เหลือน้อย' : '✅ พร้อมใช้งาน'}
-                </span>
-              </div>
-              <button onclick='deleteAccount(${JSON.stringify(account).replace(/'/g, "\\'")})' class="p-2 text-red-400 hover:bg-red-400/20 rounded-lg transition-all">
-                🗑️
-              </button>
-            </div>
-            <div class="mb-2">
-              <div class="flex justify-between text-sm mb-1">
-                <span class="text-gray-400">เหลือ</span>
-                <span class="${isExpired ? 'text-red-400' : 'text-[#0095ff]'} font-semibold">
-                  ${account.remaining_hours} / ${account.total_hours} ชม.
-                </span>
-              </div>
-              <div class="h-2 bg-white/10 rounded-full overflow-hidden">
-                <div class="h-full ${isExpired ? 'bg-red-500' : isLow ? 'bg-yellow-500' : 'bg-[#0095ff]'} rounded-full transition-all" style="width: ${percentage}%"></div>
-              </div>
-            </div>
-            <div class="flex gap-2 mt-3">
-              <button onclick='addHours("${account.__backendId}", 10)' class="flex-1 py-2 text-xs rounded-lg bg-[#0095ff]/20 text-[#0095ff] hover:bg-[#0095ff]/30 transition-all">
-                +10 ชม.
-              </button>
-              <button onclick='addHours("${account.__backendId}", 50)' class="flex-1 py-2 text-xs rounded-lg bg-[#0095ff]/20 text-[#0095ff] hover:bg-[#0095ff]/30 transition-all">
-                +50 ชม.
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Delete functions
-    function deleteRental(rental) {
-      showDeleteModal(rental);
-    }
-
-    function deleteAccount(account) {
-      showDeleteModal(account);
-    }
-
-    // Add hours to account
-    async function addHours(accountId, hours) {
-      const account = allData.find(d => d.__backendId === accountId);
-      if (account) {
-        showLoading();
-        const result = await window.dataSdk.update({
-          ...account,
-          remaining_hours: (account.remaining_hours || 0) + hours,
-          total_hours: (account.total_hours || 0) + hours
-        });
-        hideLoading();
-        if (result.isOk) {
-          showToast(`เพิ่ม ${hours} ชั่วโมงสำเร็จ`);
-        } else {
-          showToast('เกิดข้อผิดพลาด', 'error');
-        }
-      }
-    }
-
-    // Form submissions
-    document.getElementById('rental-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      if (currentRecordCount >= 999) {
-        showToast('ถึงจำนวนรายการสูงสุดแล้ว', 'error');
-        return;
-      }
-
-      const accountId = document.getElementById('rental-account').value;
-      const customerName = document.getElementById('customer-name').value.trim();
-      const hoursRented = parseInt(document.getElementById('hours-rented').value) || 0;
-      const price = parseInt(document.getElementById('rental-price').value) || 0;
-      const rentalDate = document.getElementById('rental-date').value;
-      const endDate = document.getElementById('end-date').value;
-
-      if (!accountId || !hoursRented || !rentalDate || !endDate) {
-        showToast('กรุณากรอกข้อมูลให้ครบ', 'error');
-        return;
-      }
-
-      const account = allData.find(d => d.__backendId === accountId);
-      if (!account || account.remaining_hours < hoursRented) {
-        showToast('ชั่วโมงในไอดีไม่เพียงพอ', 'error');
-        return;
-      }
-
-      showLoading();
-
-      // Create rental
-      const rentalResult = await window.dataSdk.create({
-        type: 'rental',
-        account_id: accountId,
-        account_name: account.account_name,
-        customer_name: customerName,
-        hours_rented: hoursRented,
-        price: price,
-        rental_date: new Date(rentalDate).toISOString(),
-        end_date: new Date(endDate).toISOString(),
-        remaining_hours: 0,
-        total_hours: 0
-      });
-
-      if (rentalResult.isOk) {
-        // Update account hours
-        await window.dataSdk.update({
-          ...account,
-          remaining_hours: account.remaining_hours - hoursRented
-        });
-        
-        showToast('เพิ่มรายการเช่าสำเร็จ');
-        e.target.reset();
-        
-        // Reset dates
-        const now = new Date();
-        document.getElementById('rental-date').value = now.toISOString().slice(0, 16);
-        const newEndDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        document.getElementById('end-date').value = newEndDate.toISOString().slice(0, 16);
-      } else {
-        showToast('เกิดข้อผิดพลาด', 'error');
-      }
-
-      hideLoading();
-    });
-
-    document.getElementById('account-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      if (currentRecordCount >= 999) {
-        showToast('ถึงจำนวนรายการสูงสุดแล้ว', 'error');
-        return;
-      }
-
-      const accountName = document.getElementById('account-name').value.trim();
-      const totalHours = parseInt(document.getElementById('total-hours-input').value) || 0;
-
-      if (!accountName || !totalHours) {
-        showToast('กรุณากรอกข้อมูลให้ครบ', 'error');
-        return;
-      }
-
-      showLoading();
-
-      const result = await window.dataSdk.create({
-        type: 'account',
-        account_id: '',
-        account_name: accountName,
-        hours_rented: 0,
-        price: 0,
-        rental_date: '',
-        end_date: '',
-        remaining_hours: totalHours,
-        total_hours: totalHours,
-        customer_name: ''
-      });
-
-      hideLoading();
-
-      if (result.isOk) {
-        showToast('เพิ่มไอดีสำเร็จ');
-        e.target.reset();
-      } else {
-        showToast('เกิดข้อผิดพลาด', 'error');
-      }
-    });
-
-    // Element SDK config change handler
-    async function onConfigChange(newConfig) {
-      config = { ...defaultConfig, ...newConfig };
-      
-      document.getElementById('app-title').textContent = config.app_title;
-      document.getElementById('currency-display').textContent = config.currency_symbol;
-      
-      // Update income display
-      const rentals = allData.filter(d => d.type === 'rental');
-      const totalIncome = rentals.reduce((sum, r) => sum + (r.price || 0), 0);
-      document.getElementById('total-income').textContent = `${config.currency_symbol}${totalIncome.toLocaleString()}`;
-      
-      // Re-render lists with new currency
-      if (allData.length > 0) {
-        const accounts = allData.filter(d => d.type === 'account');
-        renderRentalList(rentals, accounts);
-      }
-    }
-
-    // Initialize SDKs
-    async function init() {
-      // Initialize Data SDK
-      const dataResult = await window.dataSdk.init(dataHandler);
-      if (!dataResult.isOk) {
-        console.error('Failed to initialize Data SDK');
-      }
-
-      // Initialize Element SDK
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange,
-          mapToCapabilities: (cfg) => ({
-            recolorables: [
-              {
-                get: () => cfg.background_color || defaultConfig.background_color,
-                set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
-              },
-              {
-                get: () => cfg.surface_color || defaultConfig.surface_color,
-                set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
-              },
-              {
-                get: () => cfg.text_color || defaultConfig.text_color,
-                set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-              },
-              {
-                get: () => cfg.primary_color || defaultConfig.primary_color,
-                set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
-              },
-              {
-                get: () => cfg.secondary_color || defaultConfig.secondary_color,
-                set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
-              }
-            ],
-            borderables: [],
-            fontEditable: undefined,
-            fontSizeable: undefined
-          }),
-          mapToEditPanelValues: (cfg) => new Map([
-            ['app_title', cfg.app_title || defaultConfig.app_title],
-            ['currency_symbol', cfg.currency_symbol || defaultConfig.currency_symbol]
-          ])
-        });
-      }
-    }
-
-    init();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cc366c24076fd96',t:'MTc3MDgwODI0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
